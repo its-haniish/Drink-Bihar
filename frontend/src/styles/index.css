@@ -1,0 +1,173 @@
+@import url("https://fonts.googleapis.com/css2?family=Rubik&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Ga+Maamli&family=Handlee&display=swap");
+
+body::-webkit-scrollbar {
+  width: 0;
+}
+
+body {
+  background-color: #000000;
+}
+
+.handlee {
+  font-family: "Handlee", cursive;
+}
+
+.ga {
+  font-family: "Ga Maamli", sans-serif;
+}
+
+* {
+  font-family: "Rubik", sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.water {
+  position: relative;
+  margin-top: 100px;
+}
+
+.water span {
+  top: 20px;
+  left: 650px;
+  position: absolute;
+  color: #fff;
+  transform: translate(-50%, -50%);
+  font-size: 38px;
+  letter-spacing: 5px;
+}
+
+.water span:nth-child(1) {
+  color: transparent;
+  -webkit-text-stroke: 0.3px aqua;
+}
+
+.water span:nth-child(2) {
+  color: skyblue;
+  -webkit-text-stroke: 1px aqua;
+  animation: uiverse723 3s ease-in-out infinite;
+}
+
+@keyframes uiverse723 {
+  0%,
+  100% {
+    clip-path: polygon(
+      0% 45%,
+      15% 44%,
+      32% 50%,
+      54% 60%,
+      70% 61%,
+      84% 59%,
+      100% 52%,
+      100% 100%,
+      0% 100%
+    );
+  }
+
+  50% {
+    clip-path: polygon(
+      0% 60%,
+      16% 65%,
+      34% 66%,
+      51% 62%,
+      67% 50%,
+      84% 45%,
+      100% 46%,
+      100% 100%,
+      0% 100%
+    );
+  }
+}
+
+.fade-in {
+  animation: fadeInAnimation 0.4s ease-in-out forwards;
+}
+
+@keyframes fadeInAnimation {
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .water {
+    margin-bottom: -60px;
+  }
+  .water span {
+    font-size: 100px; /* Adjust font size for smaller screens */
+  }
+
+  .water span:nth-child(1) {
+    left: 50%; /* Center horizontally */
+    top: 15px; /* Adjust top position */
+  }
+
+  .water span:nth-child(2) {
+    left: 50%; /* Center horizontally */
+    top: 15px; /* Adjust top position */
+  }
+}
+
+@media (max-width: 480px) {
+  .water span {
+    font-size: 20px; /* Further adjust font size for very small screens */
+  }
+
+  .water span:nth-child(1),
+  .water span:nth-child(2) {
+    top: 10px; /* Adjust top position */
+  }
+}
+
+.shop_now_btn {
+  padding: 1.1em 2em;
+  background: none;
+  border: 2px solid white;
+  font-size: 10px;
+  color: white;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+  border-radius: 12px;
+  background-color: black;
+  font-weight: bolder;
+  box-shadow: 0 2px 0 2px #000;
+}
+
+.shop_now_btn:before {
+  content: "";
+  position: absolute;
+  width: 100px;
+  height: 120%;
+  background-color: gray;
+  top: 50%;
+  transform: skewX(30deg) translate(-150%, -50%);
+  transition: all 0.5s;
+}
+
+.shop_now_btn:hover {
+  background-color: black;
+  text-decoration: underline;
+  color: #fff;
+}
+
+.shop_now_btn:hover::before {
+  transform: skewX(30deg) translate(150%, -50%);
+  transition-delay: 0.1s;
+}
+
+.shop_now_btn:active {
+  transform: scale(0.9);
+}
