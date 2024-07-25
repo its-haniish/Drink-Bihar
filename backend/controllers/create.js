@@ -41,7 +41,7 @@ const createBrand = async (req, res) => {
             return res.status(400).json({ message: 'Brand creation failed' });
         }
 
-        res.status(200).json({ message: 'Brand created successfully' });
+        res.status(200).json({ message: 'Brand created successfully', data: brand });
 
     } catch (error) {
         console.log(error);
@@ -60,10 +60,11 @@ const createCategory = async (req, res) => {
         });
 
         if (!category) {
+            console.log('Category creation failed');
             return res.status(400).json({ message: 'Category creation failed' });
         }
-
-        res.status(200).json({ message: 'Category created successfully' });
+        console.log('Category created successfully');
+        res.status(200).json({ message: 'Category created successfully', data: category });
 
     } catch (error) {
         console.log(error);

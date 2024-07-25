@@ -1,26 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
-import { useDispatch } from 'react-redux';
-
-const liquorCategories = [
-    'Whiskey',
-    'Vodka',
-    'Rum',
-    'Gin',
-    'Tequila',
-    'Liqueurs',
-    'Others',
-];
-
-const liquorBrands = [
-    'Johnnie Walker',
-    'Smirnoff',
-    'Bacardi',
-    'Bombay Sapphire',
-    'Patrón',
-    'Baileys',
-    'Others',
-];
+import { useSelector } from 'react-redux';
+import Loading from '../components/Loading'
+import { useNavigate } from 'react-router-dom'
 
 const AddProduct = () => {
     const [formData, setFormData] = useState({
@@ -31,7 +13,12 @@ const AddProduct = () => {
         price: '',
         description: '',
     });
+    const [brands, setBrands] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [imagePreview, setImagePreview] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const { isAuthenticated, token } = useSelector(state => state.auth);
+    const navigate = useNavigate();
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -50,15 +37,110 @@ const AddProduct = () => {
         }
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        // Submit the form data to the server or handle it as needed
-        console.log('Form Data:', formData);
+    const fetchBrandNames = async () => {
+        setIsLoading(true);
+        try {
+            const response = await fetch(`${process.env.REACT_APP_BASE_URL}/fetch-all-brand-names`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            const result = await response.json();
+
+            if (result.message === 'Brand names fetched successfully') {
+                setBrands(result.data);
+                setIsLoading(false);
+            } else {
+                console.error('Failed to fetch brands');
+                setIsLoading(false);
+            }
+        } catch (error) {
+            console.error('Error fetching brands:', error);
+            setIsLoading(false);
+        }
     };
+
+    const fetchCategoryNames = async () => {
+        setIsLoading(true);
+        try {
+            const response = await fetch(`${process.env.REACT_APP_BASE_URL}/fetch-all-category-names`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            const result = await response.json();
+
+            if (result.message === 'Category names fetched successfully') {
+                setCategories(result.data);
+                setIsLoading(false);
+            } else {
+                console.error('Failed to fetch categories');
+                setIsLoading(false);
+            }
+        } catch (error) {
+            console.error('Error fetching categories:', error);
+            setIsLoading(false);
+        }
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        try {
+            const response = await fetch(`${process.env.REACT_APP_BASE_URL}/create-product`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const result = await response.json();
+
+            if (result.message === 'Product created successfully') {
+                alert('Product added successfully');
+                setFormData({
+                    name: '',
+                    image: '',
+                    category: '',
+                    brand: '',
+                    price: '',
+                    description: ''
+                });
+                setImagePreview('');
+                setIsLoading(false);
+            } else {
+                console.error('Failed to add product');
+                alert('Failed to add product');
+                setIsLoading(false);
+            }
+        } catch (error) {
+            console.error('Error adding product:', error);
+            alert('Failed to add product');
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (!isAuthenticated) {
+            return navigate('/')
+        } else {
+            fetchBrandNames()
+            fetchCategoryNames()
+        }
+    }, [])
 
     return (
         <>
             <Navbar />
+            {isLoading && <Loading />}
             <div className="p-6 bg-gray-100 min-h-screen">
                 <h1 className="text-2xl font-bold mb-4">Add New Liquor Product</h1>
                 <div className="bg-white shadow-md rounded-lg p-6">
@@ -104,8 +186,8 @@ const AddProduct = () => {
                                 required
                             >
                                 <option value="">Select a Category</option>
-                                {liquorCategories.map((cat) => (
-                                    <option key={cat} value={cat}>{cat}</option>
+                                {categories.map((cat, index) => (
+                                    <option key={index} value={cat.name}>{cat.name}</option>
                                 ))}
                             </select>
                         </div>
@@ -121,8 +203,8 @@ const AddProduct = () => {
                                 required
                             >
                                 <option value="">Select a Brand</option>
-                                {liquorBrands.map((brand) => (
-                                    <option key={brand} value={brand}>{brand}</option>
+                                {brands.map((brand, index) => (
+                                    <option key={index} value={brand.name}>{brand.name}</option>
                                 ))}
                             </select>
                         </div>

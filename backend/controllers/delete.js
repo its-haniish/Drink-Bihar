@@ -6,43 +6,55 @@ const deleteProduct = async (req, res) => {
     try {
         const { productId } = req.body;
 
-        // Update product availability
-        await Products.findByIdAndUpdate(productId, { isAvailable: false });
+        // Delete the product
+        const result = await Products.deleteOne({ _id: productId });
 
-        res.status(200).json({ message: 'Product deleted successfully' });
+        if (result.deletedCount === 1) {
+            res.status(200).json({ message: 'Product deleted successfully' });
+        } else {
+            res.status(404).json({ message: 'Product not found' });
+        }
     } catch (error) {
-        res.status(500).json({ message: 'Failed to deleted product' });
+        res.status(500).json({ message: 'Failed to delete product' });
     }
-}
+};
 
 const deleteCategory = async (req, res) => {
     try {
         const { categoryId } = req.body;
 
-        // Update category availability
-        await Category.findByIdAndUpdate(categoryId, { isAvailable: false });
+        // Delete the category
+        const result = await Category.deleteOne({ _id: categoryId });
 
-        res.status(200).json({ message: 'Category deleted successfully' });
+        if (result.deletedCount === 1) {
+            res.status(200).json({ message: 'Category deleted successfully' });
+        } else {
+            res.status(404).json({ message: 'Category not found' });
+        }
     } catch (error) {
         res.status(500).json({ message: 'Failed to delete category' });
     }
-}
+};
 
 const deleteBrand = async (req, res) => {
     try {
         const { brandId } = req.body;
 
-        // Update brand availability
-        await Brands.findByIdAndUpdate(brandId, { isAvailable: false });
+        // Delete the brand
+        const result = await Brands.deleteOne({ _id: brandId });
 
-        res.status(200).json({ message: 'Brand deleted successfully' });
+        if (result.deletedCount === 1) {
+            res.status(200).json({ message: 'Brand deleted successfully' });
+        } else {
+            res.status(404).json({ message: 'Brand not found' });
+        }
     } catch (error) {
         res.status(500).json({ message: 'Failed to delete brand' });
     }
-}
+};
 
 module.exports = {
     deleteProduct,
     deleteCategory,
     deleteBrand
-}
+};

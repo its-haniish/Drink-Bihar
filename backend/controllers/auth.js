@@ -180,8 +180,6 @@ const autoLogin = async (req, res) => {
     }
 };
 
-
-
 module.exports = {
     signupClient,
     signupSeller,

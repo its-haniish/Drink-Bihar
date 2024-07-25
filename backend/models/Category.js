@@ -16,11 +16,7 @@ const categorySchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now
-    },
-    isAvaliable: {
-        type: Boolean,
-        default: true
-    },
+    }
 });
 
 module.exports = mongoose.models.Category || mongoose.model('Category', categorySchema);

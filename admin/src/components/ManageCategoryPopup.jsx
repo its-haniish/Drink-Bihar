@@ -92,7 +92,7 @@ const ManageCategoryPopup = ({ category, onSave, onClose }) => {
                         />
                         {imagePreview && (
                             <div className="mt-4 flex justify-center">
-                                <img src={imagePreview} alt="Category Preview" className="w-full max-w-xs h-auto object-cover rounded-md" />
+                                <img src={imagePreview} alt="Category Preview" className="w-full max-w-xs h-auto object-contain rounded-md max-h-40 sm:max-h-48 md:max-h-56" />
                             </div>
                         )}
                     </div>

@@ -5,7 +5,7 @@ const Category = require('../models/Category')
 const fetchAllProducts = async (req, res) => {
     try {
         const { category, minPrice, maxPrice, brands, page, sort } = req.body;
-        const limit = 20;
+        const limit = 5;
         const skip = (page - 1) * limit;
 
         let query = {};
@@ -40,7 +40,7 @@ const fetchAllProducts = async (req, res) => {
             .skip(skip)
             .limit(limit);
 
-        res.status(200).json({ products });
+        res.status(200).json({ message: 'Products fetched successfully', data: products });
     } catch (error) {
         console.error('Error fetching products:', error);
         res.status(500).json({ message: 'Internal Server Error' });
@@ -50,14 +50,14 @@ const fetchAllProducts = async (req, res) => {
 const fetchAllBrands = async (req, res) => {
     try {
         const { page } = req.body;
-        const limit = 20;
+        const limit = 5;
         const skip = (page - 1) * limit;
 
-        const brands = await Brand.find()
+        const brands = await Brands.find({})
+            .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
             .skip(skip)
             .limit(limit);
-
-        res.status(200).json({ brands });
+        res.status(200).json({ message: 'Brands fetched successfully', data: brands });
     } catch (error) {
         console.error('Error fetching brands:', error);
         res.status(500).json({ message: 'Internal Server Error' });
@@ -67,14 +67,15 @@ const fetchAllBrands = async (req, res) => {
 const fetchAllCategories = async (req, res) => {
     try {
         const { page } = req.body;
-        const limit = 20;
+        const limit = 5;
         const skip = (page - 1) * limit;
 
-        const categories = await Category.find()
+        const categories = await Category.find({})
+            .sort({ createdAt: -1 }) // Sort by createdAt field in descending order
             .skip(skip)
             .limit(limit);
 
-        res.status(200).json({ categories });
+        res.status(200).json({ message: 'Categories fetched successfully', data: categories });
     } catch (error) {
         console.error('Error fetching categories:', error);
         res.status(500).json({ message: 'Internal Server Error' });
@@ -91,7 +92,7 @@ const fetchProduct = async (req, res) => {
             return res.status(404).json({ message: 'Product not found' });
         }
 
-        res.status(200).json({ product });
+        res.status(200).json({ message: 'Product fetched successfully', data: product });
     } catch (error) {
         console.error('Error fetching product:', error);
         res.status(500).json({ message: 'Internal Server Error' });
@@ -133,14 +134,19 @@ const fetchCategory = async (req, res) => {
 };
 
 const search = async (req, res) => {
+    console.log('Searching')
     try {
         const { keyword, page } = req.body;
         const limit = 20;
         const skip = (page - 1) * limit;
 
         if (!keyword || !page) {
+            console.error('Keyword and page are required');
             return res.status(400).json({ message: 'Keyword and page are required' });
         }
+
+        // Log keyword and page
+        console.log(`Searching for keyword: ${keyword}, page: ${page}`);
 
         // Create a case-insensitive regex for the keyword
         const keywordRegex = new RegExp(keyword, 'i');
@@ -160,17 +166,35 @@ const search = async (req, res) => {
             .limit(limit)
             .lean(); // .lean() is used to get plain JavaScript objects instead of Mongoose documents
 
-        // Remove duplicate products by product ID
-        const uniqueProducts = products.reduce((acc, product) => {
-            if (!acc.find(p => p._id.equals(product._id))) {
-                acc.push(product);
-            }
-            return acc;
-        }, []);
+        // Log fetched products
+        console.log('Products fetched:', products);
 
-        res.status(200).json({ products: uniqueProducts });
+        res.status(200).json({ message: 'Products searched successfully', products });
     } catch (error) {
         console.error('Error searching products:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+};
+
+
+const fetchAllBrandsNames = async (req, res) => {
+    try {
+        const brands = await Brands.find({}).select('name -_id');
+
+        res.status(200).json({ message: 'Brand names fetched successfully', data: brands });
+    } catch (error) {
+        console.error('Error fetching brand names:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+};
+
+const fetchAllCategoriesNames = async (req, res) => {
+    try {
+        const categories = await Category.find({}).select('name -_id'); // Select only the name field and exclude the _id field
+
+        res.status(200).json({ message: 'Category names fetched successfully', data: categories });
+    } catch (error) {
+        console.error('Error fetching category names:', error);
         res.status(500).json({ message: 'Internal Server Error' });
     }
 };
@@ -182,5 +206,7 @@ module.exports = {
     fetchProduct,
     fetchBrand,
     fetchCategory,
-    search
+    search,
+    fetchAllBrandsNames,
+    fetchAllCategoriesNames
 }

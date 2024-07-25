@@ -16,11 +16,7 @@ const brandsSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now
-    },
-    isAvaliable: {
-        type: Boolean,
-        default: true
-    },
+    }
 });
 
 module.exports = mongoose.models.Brand || mongoose.model('Brand', brandsSchema);

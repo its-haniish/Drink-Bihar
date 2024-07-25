@@ -2,52 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaArrowLeft } from 'react-icons/fa';
 import Navbar from '../components/Navbar';
-
-const liquorCategories = [
-    'Whiskey',
-    'Vodka',
-    'Rum',
-    'Gin',
-    'Tequila',
-    'Liqueurs',
-    'Others',
-];
-
-const liquorBrands = [
-    'Johnnie Walker',
-    'Smirnoff',
-    'Bacardi',
-    'Bombay Sapphire',
-    'Patrón',
-    'Baileys',
-    'Others',
-];
-
-const mockProducts = [
-    {
-        id: 1,
-        name: 'Johnnie Walker Black Label',
-        image: 'https://wallpapercave.com/wp/wp1834487.jpg',
-        category: 'Whiskey',
-        brand: 'Johnnie Walker',
-        price: 59.99,
-        description: 'A premium blended Scotch whisky.',
-    },
-    {
-        id: 2,
-        name: 'Smirnoff Vodka',
-        image: 'https://wallpapercave.com/wp/wp1834487.jpg',
-        category: 'Vodka',
-        brand: 'Smirnoff',
-        price: 24.99,
-        description: 'A classic vodka with a smooth taste.',
-    },
-    // Add more mock products as needed
-];
+import Loading from '../components/Loading';
+import { useSelector } from 'react-redux';
 
 const EditProduct = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { isAuthenticated, token } = useSelector((state) => state.auth);
     const [formData, setFormData] = useState({
         name: '',
         image: '',
@@ -57,14 +18,91 @@ const EditProduct = () => {
         description: '',
     });
     const [imagePreview, setImagePreview] = useState('');
+    const [brands, setBrands] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
-        const product = mockProducts.find((p) => p.id === parseInt(id));
-        if (product) {
-            setFormData(product);
-            setImagePreview(product.image);
+        if (!isAuthenticated) {
+            navigate('/');
+            return;
         }
-    }, [id]);
+        fetchProductDetails();
+        fetchBrandNames();
+        fetchCategoryNames();
+    }, [id, isAuthenticated, navigate, token]);
+
+    const fetchProductDetails = async () => {
+        setIsLoading(true);
+        try {
+            const response = await fetch(`${process.env.REACT_APP_BASE_URL}/fetch-product`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({ id })
+            });
+
+            const result = await response.json();
+
+            if (result?.message === 'Product fetched successfully') {
+                setFormData(result.data);
+                setImagePreview(result.data.image);
+                setIsLoading(false);
+            } else {
+                console.error('Failed to fetch product details');
+                setIsLoading(false);
+            }
+        } catch (error) {
+            console.error('Error fetching product details:', error);
+            setIsLoading(false);
+        }
+    };
+
+    const fetchBrandNames = async () => {
+        try {
+            const response = await fetch(`${process.env.REACT_APP_BASE_URL}/fetch-all-brand-names`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+
+            const result = await response.json();
+
+            if (result.message === 'Brand names fetched successfully') {
+                setBrands(result.data);
+            } else {
+                console.error('Failed to fetch brands');
+            }
+        } catch (error) {
+            console.error('Error fetching brands:', error);
+        }
+    };
+
+    const fetchCategoryNames = async () => {
+        try {
+            const response = await fetch(`${process.env.REACT_APP_BASE_URL}/fetch-all-category-names`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+
+            const result = await response.json();
+
+            if (result.message === 'Category names fetched successfully') {
+                setCategories(result.data);
+            } else {
+                console.error('Failed to fetch categories');
+            }
+        } catch (error) {
+            console.error('Error fetching categories:', error);
+        }
+    };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -83,20 +121,44 @@ const EditProduct = () => {
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Submit the form data to the server or handle it as needed
-        console.log('Updated Product Data:', formData);
+        setIsLoading(true);
+        try {
+            const response = await fetch(`${process.env.REACT_APP_BASE_URL}/update-product`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({ productId: id, productData: formData }),
+            });
+
+            const result = await response.json();
+
+            if (result.message === 'Product updated successfully.') {
+                navigate('/all-products');
+            } else {
+                console.error('Failed to update product');
+                alert('Failed to update product');
+            }
+        } catch (error) {
+            console.error('Error updating product:', error);
+            alert('Failed to update product');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
         <>
             <Navbar />
+            {isLoading && <Loading />}
             <div className="p-6 bg-gray-100 min-h-screen">
-                <div className="flex items-center mb-4" >
+                <div className="flex items-center mb-4">
                     <button
                         onClick={() => navigate('/all-products')}
-                        className="text-black hover:text-gray-700 focus:outline-none text-center mb-[10px]"
+                        className="text-black hover:text-gray-700 focus:outline-none"
                     >
                         <FaArrowLeft size={24} />
                     </button>
@@ -145,8 +207,8 @@ const EditProduct = () => {
                                 required
                             >
                                 <option value="">Select a Category</option>
-                                {liquorCategories.map((cat) => (
-                                    <option key={cat} value={cat}>{cat}</option>
+                                {categories.map((cat) => (
+                                    <option key={cat.name} value={cat.name}>{cat.name}</option>
                                 ))}
                             </select>
                         </div>
@@ -162,8 +224,8 @@ const EditProduct = () => {
                                 required
                             >
                                 <option value="">Select a Brand</option>
-                                {liquorBrands.map((brand) => (
-                                    <option key={brand} value={brand}>{brand}</option>
+                                {brands.map((brand) => (
+                                    <option key={brand.name} value={brand.name}>{brand.name}</option>
                                 ))}
                             </select>
                         </div>

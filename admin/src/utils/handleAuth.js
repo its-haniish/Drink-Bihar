@@ -138,12 +138,12 @@ export const autoLogin = async (dispatch, navigate, setIsLoading) => {
             });
             setIsLoading(false)
         } else {
-            alert(result?.message);
+            console.log(result?.message);
             setIsLoading(false)
             navigate('/login');
         }
     } catch (error) {
         console.log(error);
-        alert('Failed to auto login.');
+        navigate('/login');
     }
 };
